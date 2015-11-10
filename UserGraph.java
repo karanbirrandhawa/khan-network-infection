@@ -35,7 +35,7 @@ public class UserGraph {
 		numUsers++;
 	}
 
-	// Total infection. Worse case is O(numUsers)
+	// Total infection. 
 	public void updateUserVersions(int newVersion) {
 		// the network version should now be this new version
 		networkVersion = newVersion;
@@ -60,17 +60,21 @@ public class UserGraph {
 			usersToBeInfected.remove(user);
 
 			// infect all students
-			for(int i = 0; i < students.length; i++) {
-				students[i].setVersion(newVersion);		
+			for(int i = 0; i < students.length; i++) {		
 				// attempt to remove this user from users to be infected set since they've been infected
-				usersToBeInfected.remove(students[i]);
+				if (usersToBeInfected.contains(students[i])) {
+					students[i].setVersion(newVersion);
+					usersToBeInfected.remove(students[i]);
+				}
 			}
 
 			// infect all teachers
-			for(int i = 0; i < teachers.length; i++) {
-				teachers[i].setVersion(newVersion);		
+			for(int i = 0; i < teachers.length; i++) {		
 				// attempt to remove this user from users to be infected set since they've been infected
-				usersToBeInfected.remove(teachers[i]);
+				if (usersToBeInfected.contains(teachers[i])) {
+					teachers[i].setVersion(newVersion);
+					usersToBeInfected.remove(teachers[i]);
+				}
 			}
 		}
 	}
@@ -97,30 +101,35 @@ public class UserGraph {
 			User[] students = user.getStudents();
 			User[] teachers = user.getTeachers();
 
-			// start by infecting the user and removing it from usersToBeInfected set
+			// infect the user and remove it from usersToBeInfected set
 			user.setVersion(newVersion);
 			usersToBeInfected.remove(user);
-
+			
 			// infect all students
-			for(int i = 0; i < students.length; i++) {
-				students[i].setVersion(newVersion);		
+			for(int i = 0; i < students.length; i++) {		
 				// attempt to remove this user from users to be infected set since they've been infected
-				usersToBeInfected.remove(students[i]);
-				numInfected++;
+				if (usersToBeInfected.contains(students[i])) {
+					students[i].setVersion(newVersion);
+					usersToBeInfected.remove(students[i]);
+					numInfected++;
 
-				if (numInfected == maxInfected) {
-					return;
+					if (numInfected == maxInfected) {
+						return;
+					}
 				}
 			}
 
 			// infect all teachers
-			for(int i = 0; i < teachers.length; i++) {
-				teachers[i].setVersion(newVersion);		
+			for(int i = 0; i < teachers.length; i++) {	
 				// attempt to remove this user from users to be infected set since they've been infected
-				usersToBeInfected.remove(teachers[i]);
+				if (usersToBeInfected.contains(teachers[i])) {
+					teachers[i].setVersion(newVersion);	
+					usersToBeInfected.remove(teachers[i]);
+					numInfected++;
 
-				if (numInfected == maxInfected) {
-					return;
+					if (numInfected == maxInfected) {
+						return;
+					}
 				}
 			}
 		}

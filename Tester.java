@@ -30,8 +30,10 @@ public class Tester {
 		testCase6();
 		System.out.println("Test case 7: Network with student-teacher cycle");
 		testCase7();
+		testCase9();
 		System.out.println("Test case 8: Network with isolated user");
 		testCase7();
+		testCase10();
 	}
 
 	/** 
@@ -196,20 +198,6 @@ public class Tester {
 							: (ANSI_RED + "Fail. " + unupdatedUserCount + " users are not version 2." + ANSI_RESET);
 
 		System.out.println(results + "\n");
-
-		// Add all users to new graph, this time to test limited infection
-		int maxUsersInfected = 2;
-		System.out.println(ANSI_BLUE + "Running limited infection for " + maxUsersInfected + " users. Update network to version 3!" + ANSI_RESET);
-
-		graph.updateUserVersions(3, maxUsersInfected);
-
-		users = graph.getAllUsers();
-		unupdatedUserCount = checkUserVersion(graph, 3); // check how many users in the graph are not version 2
-		pass = unupdatedUserCount <= (3 - maxUsersInfected); 
-
-		results = pass 
-					? (ANSI_GREEN + "Pass! All users are version 2." + ANSI_RESET)
-					: (ANSI_RED + "Fail. Incorrect number of users are not version 2." + ANSI_RESET);
 	}
 
 	// Network with 1 node isolated from rest
@@ -241,19 +229,75 @@ public class Tester {
 							: (ANSI_RED + "Fail. " + unupdatedUserCount + " users are not version 2." + ANSI_RESET);
 
 		System.out.println(results + "\n");
+	}
 
-		// Add all users to new graph, this time to test limited infection
-		int maxUsersInfected = 2;
-		System.out.println(ANSI_BLUE + "Running limited infection for " + maxUsersInfected + " users. Update network to version 3!" + ANSI_RESET);
+	// Network which contains teacher-student cycle (user's student is also user's teacher)
+	static void testCase9() {
+		User user1 = new User(0, 1);
+		User user2 = new User(1, 1);
+		User user3 = new User(2, 1);
 
-		graph.updateUserVersions(3, maxUsersInfected);
+		// User1 teaches user2
+		user1.addStudent(user2);
+		user2.addTeacher(user1);
 
-		users = graph.getAllUsers();
-		unupdatedUserCount = checkUserVersion(graph, 3); // check how many users in the graph are not version 2
-		pass = unupdatedUserCount <= (3 - maxUsersInfected); 
+		// User1 also teachers user3
+		user1.addStudent(user3);
+		user3.addStudent(user1);
 
-		results = pass 
-					? (ANSI_GREEN + "Pass! All users are version 2." + ANSI_RESET)
-					: (ANSI_RED + "Fail. Incorrect number of users are not version 2." + ANSI_RESET);
+		// User2 teachers user1. This means user1 and 2 both teach other (cycle)
+		user2.addStudent(user1);
+		user1.addTeacher(user2);
+
+		// Add all users to graph
+		System.out.println(ANSI_BLUE + "Initializing network as version 1.." + ANSI_RESET);
+		UserGraph graph = new UserGraph(1);
+		graph.addUserToGraph(user1);
+		graph.addUserToGraph(user2);
+		graph.addUserToGraph(user3);
+
+		System.out.println(ANSI_BLUE + "Running limited infection. Update network to version 2!" + ANSI_RESET);
+		graph.updateUserVersions(2, 2);
+
+		User[] users = graph.getAllUsers();
+		int unupdatedUserCount = checkUserVersion(graph, 2);
+		boolean pass = unupdatedUserCount == 0;
+
+		String results = pass 
+							? (ANSI_GREEN + "Pass! All users are version 2." + ANSI_RESET)
+							: (ANSI_RED + "Fail. " + unupdatedUserCount + " users are not version 2." + ANSI_RESET);
+
+		System.out.println(results + "\n");
+	}
+
+	// Network with 1 node isolated from rest
+	static void testCase10() {
+		User user1 = new User(0, 1);
+		User user2 = new User(1, 1);
+		User user3 = new User(2, 1);
+
+		// User1 teaches user2
+		user1.addStudent(user2);
+		user2.addTeacher(user1);
+
+		// Add all users to graph
+		System.out.println(ANSI_BLUE + "Initializing network as version 1.." + ANSI_RESET);
+		UserGraph graph = new UserGraph(1);
+		graph.addUserToGraph(user1);
+		graph.addUserToGraph(user2);
+		graph.addUserToGraph(user3);
+
+		System.out.println(ANSI_BLUE + "Running limited infection. Update network to version 2!" + ANSI_RESET);
+		graph.updateUserVersions(2, 2);
+
+		User[] users = graph.getAllUsers();
+		int unupdatedUserCount = checkUserVersion(graph, 2);
+		boolean pass = unupdatedUserCount == 0;
+
+		String results = pass 
+							? (ANSI_GREEN + "Pass! All users are version 2." + ANSI_RESET)
+							: (ANSI_RED + "Fail. " + unupdatedUserCount + " users are not version 2." + ANSI_RESET);
+
+		System.out.println(results + "\n");
 	}
 }
